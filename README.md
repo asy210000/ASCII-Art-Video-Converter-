@@ -18,7 +18,7 @@ pip install opencv-python colorama
 
 ## Usage  
 
-1. Replace `"saf2ai4.mp4"` in `main()` with the path to your own video file.  
+1. Replace `"vid.mp4"` in `main()` with the path to your own video file.  
 2. Run the script:  
 
 ```bash
