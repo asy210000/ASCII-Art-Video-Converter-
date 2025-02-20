@@ -1,0 +1,78 @@
+import cv2
+from colorama import init
+import time
+
+# Initialize colorama for colored terminal output
+init(autoreset=True)
+
+class VideoToText:
+    def __init__(self, video_path, width=100, delay=0.03):
+        self.video_path = video_path
+        self.width = width
+        self.delay = delay
+        self.ascii_chars = "whatever"  # Custom characters used for ASCII representation
+        self.background_char = " "  # Character for background spaces
+
+    def __pixel_to_ascii(self, pixel):
+        """Convert pixel brightness to an ASCII character."""
+        brightness = sum(pixel[:3]) / 3  # Average RGB values (ignoring alpha)
+        ascii_index = int(brightness / 255 * (len(self.ascii_chars) - 1))
+        return self.ascii_chars[ascii_index]
+
+    def __get_color(self, pixel):
+        """Generate ANSI color escape code for a given pixel."""
+        b, g, r = pixel  # OpenCV uses BGR format
+        return f"\033[38;2;{r};{g};{b}m"
+
+    def __frame_to_ascii(self, frame):
+        """Convert an image frame to ASCII representation."""
+        aspect_ratio = frame.shape[0] / frame.shape[1]
+        new_height = int(self.width * aspect_ratio * 0.4)  # Adjust height to fit terminal
+        resized_frame = cv2.resize(frame, (self.width, new_height))
+
+        ascii_art = []
+        for row in range(resized_frame.shape[0]):
+            line = ""
+            for col in range(resized_frame.shape[1]):
+                pixel = resized_frame[row, col]
+                ascii_char = self.__pixel_to_ascii(pixel)
+                color = self.__get_color(pixel)
+                line += f"{color}{ascii_char}"
+            ascii_art.append(line)
+        return ascii_art
+
+    def run(self):
+        """Process the video and display it as ASCII in the terminal."""
+        cap = cv2.VideoCapture(self.video_path)
+        if not cap.isOpened():
+            print("Error: Unable to open video file.")
+            return
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Restart video when it ends
+                continue
+
+            ascii_art = self.__frame_to_ascii(frame)
+
+            # Clear the terminal and print the ASCII frame
+            print("\033[H", end="")
+            print("\n".join(ascii_art), end="", flush=True)
+
+            time.sleep(self.delay)
+
+            # Exit if 'q' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+def main():
+    video_path = "vid.mp4"  # Replace with your video path
+    video_to_text = VideoToText(video_path=video_path, width=80, delay=0.03)
+    video_to_text.run()
+
+if __name__ == "__main__":
+    main()
