@@ -44,12 +44,6 @@ video_to_text = VideoToText(video_path="your_video.mp4", width=80, delay=0.05)
 - Press `q` while the video is playing to exit the program.  
 - The script will automatically loop when it reaches the end of the video.  
 
-## Example Output  
-
-```
-(Colored ASCII representation of the video playing in the terminal)
-```
-
 ## License  
 
 This project is open-source under the MIT License. Feel free to modify and improve it! 🚀  
